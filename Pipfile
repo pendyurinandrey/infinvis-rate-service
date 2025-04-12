@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = { extras = ["standard"], version = "0.115.12" }
+polars = "1.27.1"
+SQLAlchemy = "2.0.40"
+aiohttp = "aiohttp"
+
+[dev-packages]
+pylint = "3.3.6"
+pytest = "8.3.5"
+
+[requires]
+python_version = "3.13"
+python_full_version = "3.13.3"
