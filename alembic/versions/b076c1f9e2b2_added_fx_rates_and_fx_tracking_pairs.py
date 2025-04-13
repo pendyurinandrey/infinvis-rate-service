@@ -1,8 +1,8 @@
 """Added fx_rates and fx_tracking_pairs
 
-Revision ID: f8c2eb76c2a0
+Revision ID: b076c1f9e2b2
 Revises: 
-Create Date: 2025-04-13 18:08:56.731339
+Create Date: 2025-04-13 19:07:14.837006
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'f8c2eb76c2a0'
+revision: str = 'b076c1f9e2b2'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,6 +34,7 @@ def upgrade() -> None:
     sa.Column('sources_config', postgresql.JSONB(astext_type=sa.Text()), nullable=False),
     sa.Column('last_sync_date', sa.TIMESTAMP(timezone=True), nullable=False),
     sa.Column('last_sync_status', sa.String(length=10), nullable=False),
+    sa.Column('last_rate_date', sa.DateTime(), nullable=False),
     sa.PrimaryKeyConstraint('currency_code_from', 'currency_code_to', name='fx_tracking_pairs_unique_idx')
     )
     # ### end Alembic commands ###
