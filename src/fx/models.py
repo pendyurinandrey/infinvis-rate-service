@@ -20,7 +20,7 @@ class FxRate(Base):
     __table_args__ = (
         PrimaryKeyConstraint('date', 'currency_code_from', 'currency_code_to', name='fx_rates_unique_idx'),)
 
-class FxTrackingPairs(Base):
+class FxTrackingPair(Base):
     __tablename__ = 'fx_tracking_pairs'
 
     currency_code_from: Mapped[str] = mapped_column(String(3))
