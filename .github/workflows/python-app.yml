@@ -44,4 +44,4 @@ jobs:
 #          mkdir test-results
 #          pipenv run pytest --junitxml=test-results/junit.xml
       - name: Test migrations
-        run: alembic upgrade head
+        run: pipenv run alembic upgrade head
