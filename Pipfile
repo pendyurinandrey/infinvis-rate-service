@@ -9,6 +9,7 @@ polars = "1.27.1"
 SQLAlchemy = "2.0.40"
 aiohttp = "3.11.16"
 alembic = "1.15.2"
+psycopg2 = "2.9.10"
 
 [dev-packages]
 pylint = "3.3.6"
