@@ -8,7 +8,7 @@ from wiremock.server import WireMockServer
 
 @pytest.fixture(scope="session")
 def wm_server():
-    with WireMockServer() as wm:
+    with WireMockServer(root_dir='./build') as wm:
         Config.base_url = 'http://localhost:{}/__admin'.format(wm.port)
         yield wm
 
