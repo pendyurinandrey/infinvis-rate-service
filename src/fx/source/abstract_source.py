@@ -4,6 +4,7 @@ from typing import Optional, Dict
 import polars as pl
 
 SCHEMA = ['date', 'currencyCodeFrom', 'currencyCodeTo', 'rate']
+DECIMAL_MONEY_TYPE = pl.Decimal(38, 10)
 
 
 class AbstractExchangeRatesSource(ABC):

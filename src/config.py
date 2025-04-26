@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 @dataclasses.dataclass(frozen=True)
 class AlphavantageConfig:
     fiat_url_pattern: str
+    crypto_url_pattern: str
     api_key: str
 
 
