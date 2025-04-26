@@ -18,6 +18,7 @@ pytest = "8.3.5"
 pytest-asyncio = "0.26.0"
 wiremock = "2.6.1"
 aiofiles = "24.1.0"
+testcontainers = "4.10.0"
 
 [requires]
 python_version = "3.13"

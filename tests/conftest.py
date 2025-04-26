@@ -3,14 +3,16 @@ import shutil
 
 import pytest
 from wiremock.constants import Config
-from wiremock.server import WireMockServer
+from wiremock.resources.mappings.resource import Mappings
+from wiremock.testing.testcontainer import wiremock_container
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def wm_server():
-    with WireMockServer(root_dir='./build') as wm:
-        Config.base_url = 'http://localhost:{}/__admin'.format(wm.port)
+    with wiremock_container(secure=False) as wm:
+        Config.base_url = wm.get_url("__admin") # (2
         yield wm
+        Mappings.delete_all_mappings()
 
 
 @pytest.fixture

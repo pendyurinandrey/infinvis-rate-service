@@ -86,7 +86,7 @@ async def test_that_fiat_to_crypto_with_3_records_will_be_parsed(wm_server, data
 def _create_mock_random_uri(wm_server, payload: str, http_status_code: int = 200) -> str:
     uri = f'/{str(uuid.uuid4())}'
     _create_mock(uri, payload, http_status_code)
-    return 'http://localhost:{}{}'.format(wm_server.port, uri)
+    return wm_server.get_url(uri)
 
 
 def _create_mock(uri: str, payload: str, http_status_code: int = 200):
