@@ -1,11 +1,10 @@
-FROM python:3.13-slim
+FROM ghcr.io/astral-sh/uv:0.8.23-python3.13-trixie-slim
 
 WORKDIR /usr/local/
 
-ADD app app/
-ADD Pipfile ./
-ADD Pipfile.lock ./
-RUN pip install pipenv
-RUN pipenv install
+ADD src src/
+ADD pyproject.toml ./
+ADD uv.lock ./
+RUN uv sync --locked
 
-CMD ["pipenv", "run", "server"]
+CMD ["/usr/local/.venv/bin/fastapi", "run", "src/main.py", "--port", "8080", "--host", "0.0.0.0"]
