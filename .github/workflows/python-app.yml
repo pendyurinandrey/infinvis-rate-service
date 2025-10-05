@@ -31,15 +31,17 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.13
-      - name: Install pipenv
-        run: pip install pipenv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.8.23"
       - name: Install dependencies
-        run: pipenv install --dev
+        run: uv sync --group=dev
       - name: Run pylint
-        run: pipenv run pylint --fail-under=9 ./src
+        run: uv run pylint --fail-under=9 ./src
       - name: Run tests
         run: |
           cd tests
-          pipenv run pytest --junitxml=../test-results/junit.xml
+          uv run pytest --junitxml=../test-results/junit.xml
       - name: Test migrations
-        run: pipenv run alembic upgrade head
+        run: uv run alembic upgrade head
