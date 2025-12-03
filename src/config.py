@@ -12,6 +12,7 @@ class AlphavantageConfig:
 class PolygonConfig:
     url_pattern: str
     api_key: str
+    ignore_spread: bool
 
 class AbstractServiceConfig(ABC):
 

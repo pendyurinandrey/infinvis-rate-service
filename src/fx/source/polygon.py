@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from decimal import Decimal
+from typing import Dict, Tuple
 
 import polars as pl
 import pytz
@@ -9,16 +10,36 @@ from src.fx.currency_helpers import is_fiat, is_crypto
 from src.fx.source.abstract_source import AbstractExchangeRatesSource, create_empty_df, DECIMAL_MONEY_TYPE
 
 
+def _build_allowed_crypto_fiat_pairs(config: PolygonConfig) -> Dict[str, set[str]]:
+    base = {
+        'btc': {
+            'usd'
+        },
+        'eth': {
+            'usd'
+        },
+        'usdt': {
+            'usd'
+        }
+    }
+
+    if config.ignore_spread:
+        cross_pairs = dict()
+        for k, v in base.items():
+            for code in v:
+                if code in cross_pairs:
+                    cross_pairs[code].add(k)
+                else:
+                    cross_pairs[code] = {k}
+        base.update(cross_pairs)
+    return base
+
+
 class PolygonCryptoExchangeRatesSource(AbstractExchangeRatesSource):
 
     def __init__(self, config: PolygonConfig, client_session):
-        super().__init__({
-            'usd': {
-                'btc',
-                'eth',
-                'usdt'
-            }
-        })
+        super().__init__(_build_allowed_crypto_fiat_pairs(config))
+        self._config = config
         self._base_provider = _BasePolygonFxProvider(config, client_session)
 
     async def get_exchange_rates(self,
@@ -26,10 +47,11 @@ class PolygonCryptoExchangeRatesSource(AbstractExchangeRatesSource):
                                  to_currency_code: str,
                                  from_date: date,
                                  to_date: date) -> pl.LazyFrame:
-        if is_fiat(from_currency_code):
+        if is_fiat(from_currency_code) and self._config.ignore_spread:
             # Polygon doesn't work if first currency is fiat, need to swap currencies and adjust rate
             ticker = f'X:{to_currency_code}{from_currency_code}'
             res = await self._base_provider.get_exchange_rates(ticker,
+                                                               (to_currency_code, from_currency_code),
                                                                from_date,
                                                                to_date)
             return res.select('date',
@@ -39,6 +61,7 @@ class PolygonCryptoExchangeRatesSource(AbstractExchangeRatesSource):
         elif is_crypto(from_currency_code):
             ticker = f'X:{from_currency_code}{to_currency_code}'
             return await self._base_provider.get_exchange_rates(ticker,
+                                                                (from_currency_code, to_currency_code),
                                                                 from_date,
                                                                 to_date)
         else:
@@ -68,6 +91,7 @@ class PolygonFiatExchangeRatesSource(AbstractExchangeRatesSource):
                                  to_date: date) -> pl.LazyFrame:
         ticker = f'C:{from_currency_code}{to_currency_code}'
         return await self._base_provider.get_exchange_rates(ticker,
+                                                            (from_currency_code, to_currency_code),
                                                             from_date,
                                                             to_date)
 
@@ -79,6 +103,7 @@ class _BasePolygonFxProvider:
 
     async def get_exchange_rates(self,
                                  ticker: str,
+                                 from_to_codes: Tuple[str, str],
                                  from_date: date,
                                  to_date: date) -> pl.LazyFrame:
         from_dt_str = from_date.strftime('%Y-%m-%d')
@@ -92,13 +117,13 @@ class _BasePolygonFxProvider:
         async with self._client_session.get(formatted_url) as response:
             if response.status == 200:
                 text = await response.json()
-                return self._parse_response(text)
+                return self._parse_response(text, from_to_codes)
             else:
                 return create_empty_df()
 
-    def _parse_response(self, data) -> pl.LazyFrame:
-        currency_code_from = data['ticker'][2:5]
-        currency_code_to = data['ticker'][5:]
+    def _parse_response(self, data, from_to_codes: Tuple[str, str]) -> pl.LazyFrame:
+        currency_code_from = from_to_codes[0]
+        currency_code_to = from_to_codes[1]
         rows = []
         if 'results' not in data:
             return create_empty_df()
