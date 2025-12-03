@@ -13,7 +13,7 @@ from tests import util
 
 
 @pytest.mark.asyncio(loop_scope="session")
-async def test_that_2_fiat_will_be_parsed(wm_server, datadir):
+async def test_that_fiat_response_with_2_records_will_be_parsed(wm_server, datadir):
     async with aiohttp.ClientSession() as session:
         payload = await util.read_file(f'{datadir}/fiat_2_records.json')
         url = util.create_mock_random_uri(wm_server, payload)
