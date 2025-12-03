@@ -1,4 +1,3 @@
-import json
 from datetime import date
 from decimal import Decimal
 from typing import Dict, Any
@@ -83,8 +82,8 @@ async def _get_fx_rates(client_session,
                         to_currency_code: str) -> pl.LazyFrame:
     async with client_session.get(url) as response:
         if response.status == 200:
-            text = await response.text()
-            return _parse_response(json.loads(text), from_currency_code, to_currency_code)
+            data = await response.json()
+            return _parse_response(data, from_currency_code, to_currency_code)
         else:
             return create_empty_df()
 

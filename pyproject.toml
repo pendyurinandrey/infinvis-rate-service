@@ -11,7 +11,8 @@ dependencies = [
     "aiohttp==3.11.16",
     "alembic==1.15.2",
     "psycopg2-binary==2.9.10",
-    "currency-codes==23.6.4"
+    "currency-codes==23.6.4",
+    "pytz==2025.2"
 ]
 
 [dependency-groups]
