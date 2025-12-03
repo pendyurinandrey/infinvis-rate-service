@@ -16,17 +16,17 @@ def _resolve_3_letter_currency_codes(currencies: List[Currency]) -> set[str]:
 
 
 class CurrencyTypeResolver:
-    _crypto_currencies_codes = _resolve_3_letter_currency_codes(get_crypto_currencies())
-    _fiat_currencies_codes = _resolve_3_letter_currency_codes(get_fiat_currencies())
+    _CRYPTO_CURRENCIES_CODES = _resolve_3_letter_currency_codes(get_crypto_currencies())
+    _FIAT_CURRENCIES_CODES = _resolve_3_letter_currency_codes(get_fiat_currencies())
 
     @classmethod
     def is_crypto(cls, code: str) -> bool:
         if not code:
             return False
-        return code.upper() in CurrencyTypeResolver._crypto_currencies_codes
+        return code.upper() in CurrencyTypeResolver._CRYPTO_CURRENCIES_CODES
 
     @classmethod
     def is_fiat(cls, code: str) -> bool:
         if not code:
             return False
-        return code.upper() in CurrencyTypeResolver._fiat_currencies_codes
+        return code.upper() in CurrencyTypeResolver._FIAT_CURRENCIES_CODES

@@ -1,11 +1,8 @@
-import uuid
 from datetime import date
 from decimal import Decimal
 
 import aiohttp
 import pytest
-from wiremock.resources.mappings import Mapping, MappingRequest, HttpMethods, MappingResponse
-from wiremock.resources.mappings.resource import Mappings
 
 from polars.testing import assert_frame_equal
 import polars as pl
@@ -20,7 +17,7 @@ from tests import util
 async def test_that_fiat_response_with_3_records_will_be_parsed(wm_server, datadir):
     async with aiohttp.ClientSession() as session:
         payload = await util.read_file(f'{datadir}/fiat_3_records.json')
-        url = _create_mock_random_uri(wm_server, payload)
+        url = util.create_mock_random_uri(wm_server, payload)
         conf = AlphavantageConfig(fiat_url_pattern=url, crypto_url_pattern='', api_key='123')
         source = AlphavantageFiatExchangeRatesSource(conf, session)
         pldf = await source.get_exchange_rates('EUR', 'USD',
@@ -38,7 +35,7 @@ async def test_that_fiat_response_with_3_records_will_be_parsed(wm_server, datad
 async def test_that_500_status_code_will_be_converted_to_empty_df(wm_server):
     async with aiohttp.ClientSession() as session:
         payload = '{}'
-        url = _create_mock_random_uri(wm_server, payload, http_status_code=500)
+        url = util.create_mock_random_uri(wm_server, payload, http_status_code=500)
         conf = AlphavantageConfig(fiat_url_pattern=url, crypto_url_pattern='', api_key='123')
         source = AlphavantageFiatExchangeRatesSource(conf, session)
         pldf = await source.get_exchange_rates('EUR', 'USD',
@@ -51,7 +48,7 @@ async def test_that_500_status_code_will_be_converted_to_empty_df(wm_server):
 async def test_that_crypto_to_fiat_with_3_records_will_be_parsed(wm_server, datadir):
     async with aiohttp.ClientSession() as session:
         payload = await util.read_file(f'{datadir}/crypto_3_records.json')
-        url = _create_mock_random_uri(wm_server, payload)
+        url = util.create_mock_random_uri(wm_server, payload)
         conf = AlphavantageConfig(fiat_url_pattern='', crypto_url_pattern=url, api_key='123')
         source = AlphavantageCryptoExchangeRatesSource(conf, session)
         pldf = await source.get_exchange_rates('BTC', 'USD',
@@ -69,7 +66,7 @@ async def test_that_crypto_to_fiat_with_3_records_will_be_parsed(wm_server, data
 async def test_that_fiat_to_crypto_with_3_records_will_be_parsed(wm_server, datadir):
     async with aiohttp.ClientSession() as session:
         payload = await util.read_file(f'{datadir}/crypto_3_records.json')
-        url = _create_mock_random_uri(wm_server, payload)
+        url = util.create_mock_random_uri(wm_server, payload)
         conf = AlphavantageConfig(fiat_url_pattern='', crypto_url_pattern=url, api_key='123')
         source = AlphavantageCryptoExchangeRatesSource(conf, session)
         pldf = await source.get_exchange_rates('USD', 'BTC',
@@ -82,18 +79,3 @@ async def test_that_fiat_to_crypto_with_3_records_will_be_parsed(wm_server, data
         ], schema=SCHEMA, orient='row')
         assert_frame_equal(actual, util.cast_rate(expected))
 
-
-def _create_mock_random_uri(wm_server, payload: str, http_status_code: int = 200) -> str:
-    uri = f'/{str(uuid.uuid4())}'
-    _create_mock(uri, payload, http_status_code)
-    return wm_server.get_url(uri)
-
-
-def _create_mock(uri: str, payload: str, http_status_code: int = 200):
-    Mappings.create_mapping(
-        Mapping(
-            request=MappingRequest(method=HttpMethods.GET, url=uri),
-            response=MappingResponse(status=http_status_code, body=payload),
-            persistent=False,
-        )
-    )

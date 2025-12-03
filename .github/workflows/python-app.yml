@@ -10,6 +10,7 @@ jobs:
   build:
     permissions:
       checks: write
+      pull-requests: write
     runs-on: ubuntu-latest
 
     services:
@@ -43,7 +44,7 @@ jobs:
         run: uv run pylint --fail-under=9 ./src
       - name: Run tests
         run: |
-          uv run pytest tests/ --junitxml=test-results/junit.xml
+          uv run pytest --cov-report xml:test-results/coverage.xml --cov src tests/ --junitxml=test-results/junit.xml
       - name: Test migrations
         run: uv run alembic upgrade head
       - name: Publish Test Report
@@ -51,3 +52,8 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         with:
           report_paths: '**/test-results/junit.xml'
+      - name: Publish code coverage
+        uses: orgoro/coverage@v3.2
+        with:
+          coverageFile: test-results/coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
