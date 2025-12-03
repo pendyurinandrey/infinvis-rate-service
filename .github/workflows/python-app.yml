@@ -10,6 +10,7 @@ jobs:
   build:
     permissions:
       checks: write
+      pull-requests: write
     runs-on: ubuntu-latest
 
     services:
