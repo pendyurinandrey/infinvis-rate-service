@@ -175,3 +175,5 @@ cython_debug/
 
 .idea
 test-results/
+dev-env/vault/data/
+dev-env/vault/secrets

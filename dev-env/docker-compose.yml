@@ -1,0 +1,30 @@
+services:
+  vault:
+    image: &vault-img hashicorp/vault:1.21
+    ports:
+      - 8200:8200
+    volumes:
+      - ./vault/data:/vault/data
+      - ./vault/vault.hcl:/vault/config/vault.hcl
+    cap_add:
+      - IPC_LOCK
+    networks:
+      - infinvis_net
+    entrypoint: vault server -config /vault/config/vault.hcl
+
+  vault-init:
+    image: *vault-img
+    environment:
+      - VAULT_ADDR=http://vault:8200
+    volumes:
+      - ./vault/init_vault.sh:/scripts/init_vault.sh:ro
+      - ./vault/secrets:/secrets
+    depends_on:
+      - vault
+    networks:
+      - infinvis_net
+    entrypoint: /bin/sh /scripts/init_vault.sh
+
+networks:
+  infinvis_net:
+    driver: bridge
