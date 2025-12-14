@@ -1,5 +1,5 @@
-storage "file" {
-  path = "/vault/data"
+storage "postgresql" {
+  connection_url = "postgres://postgres:password@postgres:5432/vault_db"
 }
 listener "tcp" {
   address     = "0.0.0.0:8200"

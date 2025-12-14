@@ -1,16 +1,43 @@
 services:
+
+  postgres:
+    image: postgres:18.1-bookworm
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./postgres/data:/var/lib/postgresql/18/docker
+      - ./postgres/vault-schema.sql:/schema/vault-schema.sql
+      - ./postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    networks:
+      - infinvis_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d vault_db -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   vault:
     image: &vault-img hashicorp/vault:1.21
     ports:
-      - 8200:8200
+      - '8200:8200'
     volumes:
-      - ./vault/data:/vault/data
       - ./vault/vault.hcl:/vault/config/vault.hcl
     cap_add:
       - IPC_LOCK
     networks:
       - infinvis_net
     entrypoint: vault server -config /vault/config/vault.hcl
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "vault status -address='http://127.0.0.1:8200'; [[ $? -eq 2 ]]"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   vault-init:
     image: *vault-img
@@ -19,11 +46,12 @@ services:
     volumes:
       - ./vault/init_vault.sh:/scripts/init_vault.sh:ro
       - ./vault/secrets:/secrets
-    depends_on:
-      - vault
     networks:
       - infinvis_net
     entrypoint: /bin/sh /scripts/init_vault.sh
+    depends_on:
+      vault:
+        condition: service_healthy
 
 networks:
   infinvis_net:

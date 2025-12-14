@@ -14,10 +14,10 @@ if ! vault status; then
   fi
   KEY=$(awk '/^Unseal Key 1/' $SECRET_FILE | awk -F ':' '{print $2}' | xargs)
   ROOT_TOKEN=$(awk '/^Initial Root Token/' $SECRET_FILE | awk -F ':' '{print $2}' | xargs)
-  vault operator unseal $KEY
+  vault operator unseal "$KEY"
 fi
 
-export VAULT_TOKEN=$ROOT_TOKEN
+export VAULT_TOKEN="$ROOT_TOKEN"
 
 # Configure AppRole
 if ! vault auth list | grep -q approle; then
