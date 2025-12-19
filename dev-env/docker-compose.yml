@@ -53,6 +53,14 @@ services:
       vault:
         condition: service_healthy
 
+  questdb:
+    image: questdb/questdb:9.2.3
+    ports:
+      - '9000:9000'
+      - '8812:8812'
+    volumes:
+      - ./questdb/data:/var/lib/questdb
+
 networks:
   infinvis_net:
     driver: bridge
