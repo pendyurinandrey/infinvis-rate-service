@@ -175,3 +175,6 @@ cython_debug/
 
 .idea
 test-results/
+dev-env/postgres/data/
+dev-env/vault/secrets
+dev-env/questdb/data
